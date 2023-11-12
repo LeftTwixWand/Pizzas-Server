@@ -42,7 +42,9 @@ app.use(function (err, req, res, next) {
 });
 app.use(
   cors({
-    origin: "*",
+    origin: ["*"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   })
 );
 module.exports = app;

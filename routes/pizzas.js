@@ -116,11 +116,13 @@ const data = [
 
 /* GET pizzas listing. */
 router.get("/", function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
   res.json(data);
 });
 
 router.get("/:pizzaId", function (req, res, next) {
   let pizza = data.find((item) => item._id === req.params.pizzaId);
+  res.header("Access-Control-Allow-Origin", "*");
   res.json(pizza);
 });
 
