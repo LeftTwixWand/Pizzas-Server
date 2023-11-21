@@ -1,33 +1,32 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
+import path, { dirname } from "path";
+// import * as path from "path";
+import httpErrors from "http-errors";
+import logger from "morgan";
+import connection from "./mongodb/connection.js";
+import pizzasRoutes from "./routes/pizzas.js";
+import {} from "dotenv/config";
+import { URL } from "url";
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var pizzasRouter = require("./routes/pizzas");
+const app = express();
+let connection = await connection.connectToCluster();
 
-var app = express();
-
+console.log("next step");
 // view engine setup
-app.set("views", path.join(__dirname, "views"));
+// app.set("views", path.join(dirname, "views"));
+app.set("views", new URL("views", import.meta.url).pathname);
 app.set("view engine", "jade");
 
+app.use(cors());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/pizzas", pizzasRouter);
+app.use(express.static(new URL("public", import.meta.url).pathname));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  next(createError(404));
+  next(httpErrors[404]);
 });
 
 // error handler
@@ -40,11 +39,7 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
-app.use(
-  cors({
-    origin: ["*"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  })
-);
-module.exports = app;
+
+app.use(pizzasRoutes);
+
+export default app;
