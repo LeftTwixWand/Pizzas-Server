@@ -1,4 +1,6 @@
 import express from "express";
+import connection from "../mongodb/connection.js";
+
 const routes = express.Router();
 
 routes.route("/pizzas/").get(async (request, response) => {

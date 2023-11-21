@@ -8,21 +8,23 @@ import connection from "./mongodb/connection.js";
 import pizzasRoutes from "./routes/pizzas.js";
 import {} from "dotenv/config";
 import { URL } from "url";
+import { promisify } from "util";
 
 const app = express();
-let connection = await connection.connectToCluster();
+let connectToDatabase = promisify(connection.connectToCluster);
+// connectToDatabase();
 
 console.log("next step");
 // view engine setup
 // app.set("views", path.join(dirname, "views"));
-app.set("views", new URL("views", import.meta.url).pathname);
+app.set("views", "./views");
 app.set("view engine", "jade");
 
 app.use(cors());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(new URL("public", import.meta.url).pathname));
+app.use(express.static("./public"));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
