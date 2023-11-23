@@ -1,14 +1,14 @@
-import { Router } from 'express';
-// import connection from "../mongodb/connection.js";
+import { Router } from "express";
+import connection from "../mongodb/connection.js";
 
 var router = Router();
 
 router.route("/pizzas/").get(async (request, response) => {
-  // let database = connection.getDatabase("pizzas-database");
-  // let collection = database.collection("pizzasCollection");
+  let database = connection.getDatabase("pizzas-database");
+  let collection = database.collection("pizzasCollection");
 
-  // let result = await collection.find({}).toArray();
-  response.json("{result: 'result'}");
+  let result = await collection.find({}).toArray();
+  response.json(result);
 });
 
 // router.get("/:pizzaId", function (req, res, next) {

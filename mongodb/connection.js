@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { MongoClient } from "mongodb";
 
 const connectionString = process.env.CONNECTION_STRING;

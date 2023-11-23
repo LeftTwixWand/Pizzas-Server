@@ -7,7 +7,6 @@ import logger from "morgan";
 import createError from "http-errors";
 import pizzasRoutes from "./routes/pizzas.js";
 import indexRouter from "./routes/index.js";
-import {} from "dotenv/config";
 
 const app = express();
 

@@ -1,6 +1,7 @@
 import app from "../app.js";
 import { createServer } from "http";
 import Debug from "debug";
+import connection from "../mongodb/connection.js";
 
 const debug = Debug("pizzas-server:server");
 
@@ -9,7 +10,12 @@ app.set("port", port);
 
 var server = createServer(app);
 
-server.listen(port);
+server.listen(port, async () => {
+  console.log(`Server is running on port ${port}`);
+  console.log("connecting to database...");
+  await connection.connectToCluster();
+});
+
 server.on("error", onError);
 server.on("listening", onListening);
 
