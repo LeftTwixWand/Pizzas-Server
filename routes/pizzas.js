@@ -1,15 +1,14 @@
-import express from "express";
-import connection from "../mongodb/connection.js";
+import { Router } from 'express';
+// import connection from "../mongodb/connection.js";
 
-const routes = express.Router();
+var router = Router();
 
-routes.route("/pizzas/").get(async (request, response) => {
-  let database = connection.getDatabase("pizzas-database");
-  let collection = database.collection("pizzasCollection");
+router.route("/pizzas/").get(async (request, response) => {
+  // let database = connection.getDatabase("pizzas-database");
+  // let collection = database.collection("pizzasCollection");
 
-  let result = await collection.find({}).toArray();
-
-  response.json(result);
+  // let result = await collection.find({}).toArray();
+  response.json("{result: 'result'}");
 });
 
 // router.get("/:pizzaId", function (req, res, next) {
@@ -38,7 +37,7 @@ routes.route("/pizzas/").get(async (request, response) => {
 //   res.sendStatus(200);
 // });
 
-// router.post("/", function (req, res, next) {
+// routes.post("/", function (req, res, next) {
 //   let pizzaFromRequest = req.body;
 //   pizzaFromRequest._id = Math.random().toString(36).substr(2, 9); // Generate a new id
 
@@ -55,4 +54,4 @@ routes.route("/pizzas/").get(async (request, response) => {
 //   res.json(sortedPizzas);
 // });
 
-export default routes;
+export default router;
