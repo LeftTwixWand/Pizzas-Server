@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 
 var router = Router();
 
-router.route("/pizzas/").get(async (request, response) => {
+router.route("/pizzas").get(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
   let collection = database.collection("pizzasCollection");
 
@@ -12,7 +12,7 @@ router.route("/pizzas/").get(async (request, response) => {
   response.json(result);
 });
 
-router.route("/:pizzaId").get(async (request, response) => {
+router.route("/pizzas/:pizzaId").get(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
   let collection = database.collection("pizzasCollection");
 
@@ -22,7 +22,7 @@ router.route("/:pizzaId").get(async (request, response) => {
   response.json(result);
 });
 
-router.route("/:pizzaId").delete(async (request, response) => {
+router.route("/pizzas/:pizzaId").delete(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
   let collection = database.collection("pizzasCollection");
 
@@ -31,7 +31,7 @@ router.route("/:pizzaId").delete(async (request, response) => {
   response.status(200).send();
 });
 
-router.route("/").post((request, response) => {
+router.route("/pizzas").post((request, response) => {
   let database = connection.getDatabase("pizzas-database");
   let collection = database.collection("pizzasCollection");
 
@@ -46,7 +46,7 @@ router.route("/").post((request, response) => {
   });
 });
 
-router.route("/:pizzaId").put(async (request, response) => {
+router.route("/pizzas/:pizzaId").put(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
   let collection = database.collection("pizzasCollection");
 
