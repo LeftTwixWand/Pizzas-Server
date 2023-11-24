@@ -1,5 +1,6 @@
 import { Router } from "express";
 import connection from "../mongodb/connection.js";
+import { ObjectId } from "mongodb";
 
 var router = Router();
 
@@ -11,47 +12,58 @@ router.route("/pizzas/").get(async (request, response) => {
   response.json(result);
 });
 
-// router.get("/:pizzaId", function (req, res, next) {
-//   let pizza = data.find((item) => item._id === req.params.pizzaId);
-//   res.header("Access-Control-Allow-Origin", "*");
-//   res.json(pizza);
-// });
+router.route("/:pizzaId").get(async (request, response) => {
+  let database = connection.getDatabase("pizzas-database");
+  let collection = database.collection("pizzasCollection");
 
-// router.put("/:pizzaId", function (req, res, next) {
-//   let pizzaFromRequest = req.body;
+  const pizzaId = request.params.pizzaId;
 
-//   let indexOfExistingPizza = data.findIndex(
-//     (item) => item._id === req.params.pizzaId
-//   );
-//   data[indexOfExistingPizza] = pizzaFromRequest;
+  let result = await collection.findOne({ _id: new ObjectId(pizzaId) });
+  response.json(result);
+});
 
-//   res.sendStatus(200);
-// });
+router.route("/:pizzaId").delete(async (request, response) => {
+  let database = connection.getDatabase("pizzas-database");
+  let collection = database.collection("pizzasCollection");
 
-// router.delete("/:pizzaId", function (req, res, next) {
-//   let indexOfExistingPizza = data.findIndex(
-//     (item) => item._id === req.params.pizzaId
-//   );
-//   data.splice(indexOfExistingPizza, 1);
+  const pizzaId = request.params.pizzaId;
+  await collection.deleteOne({ _id: new ObjectId(pizzaId) });
+  response.status(200).send();
+});
 
-//   res.sendStatus(200);
-// });
+router.route("/").post((request, response) => {
+  let database = connection.getDatabase("pizzas-database");
+  let collection = database.collection("pizzasCollection");
 
-// routes.post("/", function (req, res, next) {
-//   let pizzaFromRequest = req.body;
-//   pizzaFromRequest._id = Math.random().toString(36).substr(2, 9); // Generate a new id
+  let pizzaFromRequest = request.body;
+  // pizzaFromRequest._id = Math.random().toString(36).substring(2, 9); // Generate a new id
+  pizzaFromRequest._id = new ObjectId(); // Generate a new id
 
-//   data.push(pizzaFromRequest);
+  collection.insertOne(pizzaFromRequest).then(() => {
+    response
+      .status(200)
+      .send({ message: "Pizza created successfully", pizza: pizzaFromRequest });
+  });
+});
 
-//   res.sendStatus(200);
-// });
+router.route("/:pizzaId").put(async (request, response) => {
+  let database = connection.getDatabase("pizzas-database");
+  let collection = database.collection("pizzasCollection");
 
-//Sort
-// router.get("/:sort=price", function (req, res, next) {
-//   let sortedPizzas = data.sort((a, b) => b.price - a.price);
+  const pizzaId = request.params.pizzaId;
+  let existingPizza = await collection.findOne({
+    _id: new ObjectId(pizzaId),
+  });
 
-//   res.header("Access-Control-Allow-Origin", "*");
-//   res.json(sortedPizzas);
-// });
+  if (!existingPizza) {
+    return response.status(404).json({ message: "Pizza not found" });
+  }
+  const updatedPizzaData = request.body;
+  await collection.updateOne(
+    { _id: new ObjectId(pizzaId) },
+    { $set: updatedPizzaData }
+  );
+  response.status(200).send({ message: "Pizza updated successfully" });
+});
 
 export default router;
