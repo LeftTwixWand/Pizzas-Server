@@ -19,6 +19,9 @@ router.route("/pizzas/:pizzaId").get(async (request, response) => {
   const pizzaId = request.params.pizzaId;
 
   let result = await collection.findOne({ _id: new ObjectId(pizzaId) });
+  if (!result) {
+    return response.status(404).send("Pizza not found");
+  }
   response.json(result);
 });
 
