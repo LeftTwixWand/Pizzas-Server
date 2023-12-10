@@ -8,6 +8,7 @@ import createError from "http-errors";
 import pizzasRoutes from "./routes/pizzas.js";
 import indexRouter from "./routes/index.js";
 import cartRouter from "./routes/cart.js";
+import usersRouter from "./routes/users.js";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(express.static(path.join(dirname(), "./public")));
 app.use(indexRouter);
 app.use(pizzasRoutes);
 app.use(cartRouter);
+app.use(usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
