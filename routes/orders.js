@@ -4,38 +4,38 @@ import { ObjectId } from "mongodb";
 
 var router = Router();
 
-router.route("/users").get(async (request, response) => {
+router.route("/orders").get(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
-  let collection = database.collection("usersCollection");
+  let collection = database.collection("ordersCollection");
 
   let result = await collection.find({}).toArray();
   response.json(result);
 });
 
-router.route("/users/:userId").get(async (request, response) => {
+router.route("/orders/:orderId").get(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
-  let collection = database.collection("usersCollection");
+  let collection = database.collection("ordersCollection");
 
-  const userId = request.params.userId;
+  const orderId = request.params.orderId;
 
-  let result = await collection.findOne({ _id: new ObjectId(userId) });
+  let result = await collection.findOne({ _id: new ObjectId(orderId) });
   if (!result) {
-    return response.status(404).send("User not found");
+    return response.status(404).send("Order not found");
   }
   response.json(result);
 });
 
-router.route("/users").post(async (request, response) => {
+router.route("/orders").post(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
-  let collection = database.collection("usersCollection");
+  let collection = database.collection("ordersCollection");
 
-  let userFromRequest = request.body;
+  let orderRequest = request.body;
 
   if (
-    !userFromRequest.email &&
-    !userFromRequest.name &&
-    !userFromRequest.phone &&
-    !userFromRequest.surname
+    !orderRequest.email &&
+    !orderRequest.name &&
+    !orderRequest.phone &&
+    !orderRequest.surname
   ) {
     return response.status(400).send({ message: "All variables is required" });
   }
@@ -49,27 +49,27 @@ router.route("/users").post(async (request, response) => {
   //     .send({ message: "User with this email is already exists" });
   // }
 
-  userFromRequest._id = new ObjectId(); // Generate a new id
+  orderRequest._id = new ObjectId(); // Generate a new id
 
-  collection.insertOne(userFromRequest).then(() => {
+  collection.insertOne(orderRequest).then(() => {
     response
       .status(200)
-      .send({ message: "User created successfully", user: userFromRequest });
+      .send({ message: "Order created successfully", order: orderRequest });
   });
 });
 
-router.route("/users/:userId").delete(async (request, response) => {
+router.route("/orders/:orderId").delete(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
-  let collection = database.collection("usersCollection");
+  let collection = database.collection("ordersCollection");
 
-  const userId = request.params.userId;
-  await collection.deleteOne({ _id: new ObjectId(userId) });
-  response.status(200).send({ message: "User deleted successfully" });
+  const orderId = request.params.orderId;
+  await collection.deleteOne({ _id: new ObjectId(orderId) });
+  response.status(200).send({ message: "Order deleted successfully" });
 });
 
 // router.route("/users/:pizzaId").put(async (request, response) => {
 //   let database = connection.getDatabase("pizzas-database");
-//   let collection = database.collection("usersCollection");
+//   let collection = database.collection("ordersCollection");
 
 //   const pizzaId = request.params.pizzaId;
 //   let existingPizza = await collection.findOne({
