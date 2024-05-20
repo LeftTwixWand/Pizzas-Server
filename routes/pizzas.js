@@ -39,7 +39,6 @@ router.route("/pizzas").post((request, response) => {
   let collection = database.collection("pizzasCollection");
 
   let pizzaFromRequest = request.body;
-  // pizzaFromRequest._id = Math.random().toString(36).substring(2, 9); // Generate a new id
   pizzaFromRequest._id = new ObjectId(); // Generate a new id
 
   collection.insertOne(pizzaFromRequest).then(() => {

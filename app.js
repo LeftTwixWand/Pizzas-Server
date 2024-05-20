@@ -9,6 +9,7 @@ import pizzasRoutes from "./routes/pizzas.js";
 import indexRouter from "./routes/index.js";
 import cartRouter from "./routes/cart.js";
 import ordersRouter from "./routes/orders.js";
+import usersRouter from "./routes/users.js";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(indexRouter);
 app.use(pizzasRoutes);
 app.use(cartRouter);
 app.use(ordersRouter);
+app.use(usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
