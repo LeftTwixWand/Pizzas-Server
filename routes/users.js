@@ -141,15 +141,21 @@ router.route("/login").post(async (request, response) => {
   }
 });
 
-// Выход пользователя (удаление refreshToken из базы)
 router.route("/logout").delete(async (request, response) => {
   try {
     let database = connection.getDatabase("pizzas-database");
     let collection = database.collection("usersCollection");
 
     const refreshToken = request.body.refreshToken;
-    await collection.findOneAndDelete({ tokens: refreshToken });
-    response.sendStatus(204).send("Token has been deleted");
+    const result = await collection.deleteOne({ token: refreshToken });
+
+    if (result.deletedCount === 1) {
+      response
+        .status(200)
+        .json({ message: "Logout success || Token has been deleted" });
+    } else {
+      response.status(404).json({ message: "Token not found" });
+    }
   } catch (error) {
     console.error(error);
     response.status(500).json({ message: "Server Error" });
