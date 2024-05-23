@@ -15,7 +15,12 @@ export const generateRefreshToken = (id) => {
 export const verifyToken = (token, secret) => {
   return new Promise((resolve, reject) => {
     jwt.verify(token, secret, (err, decoded) => {
-      if (err) reject(err, "Token is expired");
+      if (err instanceof jwt.TokenExpiredError) {
+        reject(err, "Token is expired");
+      }
+      if (err instanceof jwt.JsonWebTokenError) {
+        reject(err, "Invalid token");
+      }
       resolve(decoded);
     });
   });

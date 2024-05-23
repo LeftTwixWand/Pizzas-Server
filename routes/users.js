@@ -129,6 +129,30 @@ router.route("/logout").delete(async (request, response) => {
     return response.status(400).json({ message: "Token is required" });
   }
 
+  user = await collection.findOne({ token });
+
+  if (!user) {
+    return response.status(404).send("Token not found");
+  }
+
+  await collection.updateOne({
+    _id: user._id,
+    $set: { token: "" },
+  });
+
+  return response.status(200).send("Logout success ");
+});
+
+router.route("/deleteUser").delete(async (request, response) => {
+  let database = connection.getDatabase("pizzas-database");
+  let collection = database.collection("usersCollection");
+
+  const token = request.body.token;
+
+  if (!token) {
+    return response.status(400).json({ message: "Token is required" });
+  }
+
   const result = await collection.deleteOne({ token });
 
   if (result.deletedCount === 1) {
