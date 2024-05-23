@@ -8,14 +8,14 @@ export const generateAccessToken = (id) => {
 
 export const generateRefreshToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_REFRESH_TOKEN_SECRET, {
-    expiresIn: "30d",
+    expiresIn: "15d",
   });
 };
 
 export const verifyToken = (token, secret) => {
   return new Promise((resolve, reject) => {
     jwt.verify(token, secret, (err, decoded) => {
-      if (err) reject(err);
+      if (err) reject(err, "Token is expired");
       resolve(decoded);
     });
   });
