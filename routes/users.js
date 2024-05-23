@@ -6,6 +6,7 @@ import { ObjectId } from "mongodb";
 import {
   generateAccessToken,
   generateRefreshToken,
+  verifyToken,
 } from "../service/TokenService.js";
 
 var router = Router();
@@ -26,7 +27,7 @@ router.route("/users/:userId").get(async (request, response) => {
 
   let result = await collection.findOne({ _id: new ObjectId(userId) });
   if (!result) {
-    return response.status(404).send("User not found");
+    return response.status(404).json({ message: "User not found" });
   }
   response.json(result);
 });
@@ -124,7 +125,7 @@ router.route("/login").post(async (request, response) => {
 
     await collection.updateOne(
       { _id: user._id },
-      { $push: { tokens: refreshToken } }
+      { $set: { token: refreshToken } }
     );
 
     response
@@ -134,7 +135,8 @@ router.route("/login").post(async (request, response) => {
         sameSite: "none",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .json({ accessToken, refreshToken });
+      .status(200)
+      .json({ accessToken });
   } catch (error) {
     console.error(error);
     response.status(500).json({ message: "Server Error" });
@@ -146,8 +148,8 @@ router.route("/logout").delete(async (request, response) => {
     let database = connection.getDatabase("pizzas-database");
     let collection = database.collection("usersCollection");
 
-    const refreshToken = request.body.refreshToken;
-    const result = await collection.deleteOne({ token: refreshToken });
+    const token = request.body.token;
+    const result = await collection.deleteOne({ token });
 
     if (result.deletedCount === 1) {
       response
@@ -162,33 +164,45 @@ router.route("/logout").delete(async (request, response) => {
   }
 });
 
-// Обновление access токена через refreshToken
-async function refresh(request, response) {
+router.route("/refreshTokens").put(async (request, response) => {
   try {
-    const { refreshToken } = request.body;
+    let database = connection.getDatabase("pizzas-database");
+    let collection = database.collection("usersCollection");
 
-    // Проверяем, существует ли такой refreshToken
-    const token = await Token.findOne({ refreshToken });
-    if (!token) {
-      return response.sendStatus(401);
+    const token = request.body.token;
+
+    const result = await collection.findOne({ token });
+    if (!result) {
+      return response.status(403).send("Invalid refresh token ");
     }
 
-    // Проверяем валидность refreshToken
-    jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET,
-      (error, user) => {
-        if (error) {
-          return response.sendStatus(403);
-        }
-        const accessToken = generateAccessToken({ _id: user.userId });
-        response.json({ accessToken });
-      }
+    try {
+      await verifyToken(token, process.env.JWT_REFRESH_TOKEN_SECRET);
+    } catch (error) {
+      return response.status(403).send("Invalid refresh token");
+    }
+
+    const accessToken = generateAccessToken({ _id: result._id });
+    const refreshToken = generateRefreshToken({ _id: result._id });
+
+    await collection.updateOne(
+      { _id: result._id },
+      { $set: { token: refreshToken } }
     );
+
+    return response
+      .cookie("jwt", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({ accessToken, refreshToken });
   } catch (error) {
     console.error(error);
-    response.status(500).json({ message: "Server Error" });
+    return response.status(500).json({ message: "Server Error" });
   }
-}
+});
 
 export default router;
