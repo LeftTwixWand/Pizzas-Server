@@ -46,29 +46,23 @@ router.route("/registration").post(async (request, response) => {
   let database = connection.getDatabase("pizzas-database");
   let collection = database.collection("usersCollection");
 
-  const registrationRequest = request.body;
+  const { phone, password, name } = request.body;
 
-  if (
-    !registrationRequest.phone ||
-    !registrationRequest.password ||
-    !registrationRequest.name
-  ) {
-    return response.status(400).send({ message: "All variables are required" });
+  if (!phone || !password || !name) {
+    return response.status(400).json({ message: "All variables are required" });
   }
 
-  const existingUser = await collection.findOne({
-    phone: registrationRequest.phone,
-  });
+  const existingUser = await collection.findOne({ phone });
   if (existingUser) {
     return response.status(400).json({ message: "User already exists" });
   }
 
-  const hashedPassword = await bcrypt.hash(registrationRequest.password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   const newUser = {
     _id: new ObjectId(),
-    phone: registrationRequest.phone,
-    name: registrationRequest.name,
+    phone,
+    name,
     password: hashedPassword,
     token: "",
   };
@@ -87,6 +81,7 @@ router.route("/registration").post(async (request, response) => {
     message: "User successfully registered",
     newUser,
     accessToken,
+    refreshToken,
   });
 });
 
@@ -102,12 +97,12 @@ router.route("/login").post(async (request, response) => {
 
   const user = await collection.findOne({ phone });
   if (!user) {
-    return response.status(401).json({ message: "Invalid phone number" });
+    return response.status(401).json({ message: "Invalid credentials" });
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    return response.status(401).json({ message: "Invalid password" });
+    return response.status(401).json({ message: "Invalid credentials" });
   }
 
   const accessToken = generateAccessToken(user._id);
@@ -118,15 +113,10 @@ router.route("/login").post(async (request, response) => {
     { $set: { token: refreshToken } }
   );
 
-  response
-    .cookie("jwt", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
-    .status(200)
-    .json({ accessToken });
+  response.status(200).json({
+    accessToken,
+    refreshToken,
+  });
 });
 
 router.route("/logout").delete(async (request, response) => {
@@ -183,15 +173,10 @@ router.route("/refreshTokens").put(async (request, response) => {
     { $set: { token: refreshToken } }
   );
 
-  return response
-    .cookie("jwt", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
-    .status(200)
-    .json({ accessToken, refreshToken });
+  return response.status(200).json({
+    accessToken,
+    refreshToken,
+  });
 });
 
 export default router;
