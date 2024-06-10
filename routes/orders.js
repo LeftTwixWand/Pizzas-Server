@@ -39,16 +39,7 @@ router.route("/orders").post(async (request, response) => {
   ) {
     return response.status(400).send({ message: "All variables is required" });
   }
-
-  // const existingUser = await collection.findOne({
-  //   email: userFromRequest.email,
-  // });
-  // if (existingUser) {
-  //   return response
-  //     .status(400)
-  //     .send({ message: "User with this email is already exists" });
-  // }
-
+  
   orderRequest._id = new ObjectId(); // Generate a new id
 
   collection.insertOne(orderRequest).then(() => {
